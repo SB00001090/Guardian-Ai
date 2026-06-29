@@ -73,8 +73,13 @@ if (-not $status) {
 }
 
 if ($RemoteUrl) {
-    $existing = git remote get-url origin 2>$null
-    if ($LASTEXITCODE -ne 0) {
+    $existing = ""
+    try {
+        $existing = git remote get-url origin 2>$null
+    } catch {
+        $existing = ""
+    }
+    if (-not $existing) {
         git remote add origin $RemoteUrl
         Write-Host "Added remote: $RemoteUrl"
     } elseif ($existing -ne $RemoteUrl) {
