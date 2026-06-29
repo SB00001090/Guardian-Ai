@@ -122,6 +122,9 @@ class MonsterGuardBot(commands.Bot):
                         "感謝邀請 MonsterGuard！請在任意頻道執行 **`/guard setup`** 完成設定精靈。\n\n"
                         f"**可攔截：**{intercept_preview}\n"
                         "輸入 **`/guard features`** 查看完整攔截清單。\n\n"
+                        "分享邀請連結給其他伺服器：\n"
+                        "https://discord.com/oauth2/authorize?client_id=1519991508172804096"
+                        "&permissions=1099511723008&scope=bot%20applications.commands\n\n"
                         "也可使用 **`/chat`** 與本地 Monster AI 對話（若已啟用 Chat Bridge）。"
                     ),
                     color=0x6EE7B7,

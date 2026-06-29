@@ -52,7 +52,30 @@ data/models/
 data/guard/
 data/monsterlock/
 data/monsterlock_test/
+data/training/
+data/quality/
+data/tmp/
+data/voices/
+data/personas/
+data/monster-ai.lock
+data/crimeguard/network_lock_state.json
+data/crimeguard/vpn_exit_nodes.json
+data/characters/*.json
+data/outputs/**/*
+!data/outputs/**/.gitkeep
 *.log
+
+# Duplicate nested project copy (local sync artifact)
+monster_ai/monsterai/
+
+# Bundled Windows tools (re-download locally)
+tools/nssm/*.exe
+
+# Android local build
+apps/monstercallguard-android/local.properties
+apps/monstercallguard-android/.gradle/
+apps/monstercallguard-android/**/build/
+apps/monstercallguard-android/keystore/
 
 # OS
 .DS_Store

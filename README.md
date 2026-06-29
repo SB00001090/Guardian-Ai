@@ -399,12 +399,14 @@ See [monster_ai/modules/discord/README.md](monster_ai/modules/discord/README.md)
 
 ### MonsterGuard (Discord anti-scam)
 
-1. Copy `discord.token.local.example` → `discord.token.local` and paste your bot token (never commit this file).
-2. Enable **MESSAGE CONTENT INTENT** in the [Discord Developer Portal](https://discord.com/developers/applications).
-3. Start: `scripts\start-monsterguard.bat` or `python scripts\launch_monsterguard.py`
-4. In your server: `/guard setup` then `/guard features` to see what scams are blocked.
+**Invite the bot to your server:** [MONSTERGUARD_INVITE.md](MONSTERGUARD_INVITE.md)  
+Direct link: https://discord.com/oauth2/authorize?client_id=1519991508172804096&permissions=1099511723008&scope=bot%20applications.commands
 
-Intercepts: fake Nitro, verification scams, crypto scams, phishing links, malware attachments, raid/spam, and more — see the Discord module README.
+After joining, run `/guard setup` in any text channel.
+
+**Self-hosting:** copy `discord.token.local.example` → `discord.token.local`, enable **MESSAGE CONTENT INTENT**, then `scripts\start-monsterguard.bat`.
+
+Intercepts: fake Nitro, verification scams, crypto scams, phishing links, malware attachments, raid/spam — see [monster_ai/modules/discord/README.md](monster_ai/modules/discord/README.md).
 
 ### Integrating local ComfyUI
 
