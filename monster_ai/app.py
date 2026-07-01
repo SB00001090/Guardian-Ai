@@ -313,7 +313,7 @@ def create_app(settings: Settings) -> FastAPI:
     )
     learning.bind_image_learner(image_learner)
     guardian_svc.learning = learning
-    guardian_svc.attach_network_learning(learning.web)
+    guardian_svc.attach_network_learning(learning.web, image_learner=image_learner)
 
     def _web_network_allowed() -> tuple[bool, str]:
         if crimeguard.state.network_locked:

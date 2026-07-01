@@ -296,6 +296,18 @@ async def network_learning_directives(request: Request, limit: int = 5) -> dict:
     return {"directives": nl.latest_directives(limit)}
 
 
+@router.get("/network-learning/art-triage/status")
+async def art_triage_status(request: Request) -> dict:
+    nl = _network_learning(request)
+    return nl.art_triage_status()
+
+
+@router.post("/network-learning/art-triage/run")
+async def art_triage_run(request: Request) -> dict:
+    nl = _network_learning(request)
+    return await nl.run_art_triage()
+
+
 @router.get("/connection")
 async def connection_info(request: Request) -> dict:
     """Cloudflare Tunnel only — no Tailscale, no QR code."""

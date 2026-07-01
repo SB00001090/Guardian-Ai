@@ -112,6 +112,26 @@ class TrainingVault:
         except Exception:  # noqa: BLE001
             return []
 
+    def patch_asset_metadata(self, asset_id: str, patch: dict[str, Any]) -> bool:
+        """Merge triage or learning metadata into an encrypted asset bundle."""
+        for entry in self._read_index():
+            if entry.get("id") != asset_id:
+                continue
+            path = self.root / str(entry["path"])
+            if not path.is_file():
+                return False
+            blob = EncryptedBlob.from_dict(json.loads(path.read_text(encoding="utf-8")))
+            data = self._decrypt_bundle(blob)
+            metadata = dict(data.get("metadata") or {})
+            metadata.update(patch)
+            data["metadata"] = metadata
+            path.write_text(
+                json.dumps(self._encrypt_bundle(data).to_dict(), ensure_ascii=False),
+                encoding="utf-8",
+            )
+            return True
+        return False
+
     def read_asset_metadata(self, asset_id: str) -> dict[str, Any] | None:
         """Return decrypted metadata only — image bytes stay in encrypted file until explicit decrypt."""
         for entry in self._read_index():

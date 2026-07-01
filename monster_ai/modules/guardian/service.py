@@ -14,12 +14,14 @@ from monster_ai.modules.guardian.grok_supervisor import GrokSupervisor
 from monster_ai.modules.guardian.key_manager import TrainingKeyManager
 from monster_ai.modules.guardian.oc_fingerprint import OCFingerprintStore, embed_watermark, generate_fingerprint
 from monster_ai.modules.guardian.backstory import BackstoryGenerator
+from monster_ai.modules.guardian.art_triage import ArtTriageEngine
 from monster_ai.modules.guardian.network_learning import GuardianNetworkLearner
 from monster_ai.modules.guardian.training_vault import TrainingVault
 
 if TYPE_CHECKING:
     from monster_ai.core.self_repair import SelfRepairEngine
     from monster_ai.modules.learning.engine import LearningEngine
+    from monster_ai.modules.learning.image_knowledge import ImageKnowledgeLearner
     from monster_ai.modules.learning.web_knowledge import WebKnowledgeLearner
 
 
@@ -85,13 +87,24 @@ class GuardianService:
             ),
         }
 
-    def attach_network_learning(self, web_learner: WebKnowledgeLearner) -> None:
+    def attach_network_learning(
+        self,
+        web_learner: WebKnowledgeLearner,
+        image_learner: ImageKnowledgeLearner | None = None,
+    ) -> None:
+        art_triage = ArtTriageEngine(
+            Path(self.settings.data_dir),
+            training_vault=self.training_vault,
+            image_learner=image_learner,
+            min_quality_score=self.settings.min_quality_score,
+        )
         self.network_learning = GuardianNetworkLearner(
             self.settings.network_learning,
             data_dir=Path(self.settings.data_dir),
             web_learner=web_learner,
             supervisor=self.supervisor,
             training_vault=self.training_vault,
+            art_triage=art_triage,
         )
 
     def unlock_training_vault(self, passphrase: str | None = None) -> dict[str, Any]:

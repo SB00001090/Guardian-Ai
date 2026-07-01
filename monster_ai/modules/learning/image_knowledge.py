@@ -331,6 +331,42 @@ class ImageKnowledgeLearner:
         except (OSError, json.JSONDecodeError):
             return {"count": 0, "path": str(manifest)}
 
+    def merge_art_triage_patterns(self, triage_data: dict[str, Any]) -> dict[str, Any]:
+        """Merge Guardian art triage hints into image learning patterns."""
+        patterns = self._load_patterns()
+        hints = triage_data.get("network_hints") or []
+        if hints:
+            art_hints = patterns.setdefault("art_triage_hints", [])
+            for hint in hints:
+                if hint not in art_hints:
+                    art_hints.append(hint)
+            patterns["art_triage_hints"] = art_hints[:24]
+        counts = triage_data.get("counts")
+        if isinstance(counts, dict):
+            patterns["art_triage_counts"] = counts
+        patterns["art_triage_updated_at"] = triage_data.get("last_run_at") or triage_data.get(
+            "updated_at"
+        )
+        self._save_patterns(patterns)
+        return {"ok": True, "art_triage_hints": patterns.get("art_triage_hints", [])[:8]}
+
+    def ingest_triage_summary(self, counts: dict[str, Any]) -> dict[str, Any]:
+        patterns = self._load_patterns()
+        real_n = int(counts.get("real", 0))
+        good_n = int(counts.get("good", 0))
+        bad_n = int(counts.get("bad", 0))
+        patterns["art_triage_real_count"] = real_n
+        patterns["art_triage_good_count"] = good_n
+        patterns["art_triage_bad_count"] = bad_n
+        if real_n >= 3:
+            patterns["real_art_reference_ready"] = True
+        self._save_patterns(patterns)
+        self.store.append_jsonl(
+            self.image_dir / "art_triage.jsonl",
+            {"event": "triage_ingest", "counts": counts},
+        )
+        return {"ok": True, "real_art_reference_ready": patterns.get("real_art_reference_ready", False)}
+
     def status(self) -> dict[str, Any]:
         patterns = self._load_patterns()
         manifest = self._export_training_manifest()
@@ -345,4 +381,6 @@ class ImageKnowledgeLearner:
             "training_samples": manifest.get("count", 0),
             "training_ready": patterns.get("training_ready", False),
             "suggested_params": self.suggested_params(),
+            "art_triage_hints": patterns.get("art_triage_hints", [])[:8],
+            "real_art_reference_ready": patterns.get("real_art_reference_ready", False),
         }

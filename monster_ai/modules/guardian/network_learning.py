@@ -16,6 +16,7 @@ from monster_ai.modules.guardian.privacy_firewall import (
 )
 
 if TYPE_CHECKING:
+    from monster_ai.modules.guardian.art_triage import ArtTriageEngine
     from monster_ai.modules.guardian.grok_supervisor import GrokSupervisor
     from monster_ai.modules.guardian.training_vault import TrainingVault
     from monster_ai.modules.learning.web_knowledge import WebKnowledgeLearner
@@ -38,6 +39,7 @@ class GuardianNetworkLearner:
         web_learner: WebKnowledgeLearner,
         supervisor: GrokSupervisor,
         training_vault: TrainingVault | None = None,
+        art_triage: ArtTriageEngine | None = None,
     ) -> None:
         self.settings = settings
         self.root = data_dir / "network_learning"
@@ -49,6 +51,7 @@ class GuardianNetworkLearner:
         self._web = web_learner
         self._supervisor = supervisor
         self._vault = training_vault
+        self._art_triage = art_triage
         self._scheduler = LearningScheduler(settings.schedule_windows)
         self._active = False
 
@@ -102,7 +105,20 @@ class GuardianNetworkLearner:
             "last_run_ok": last_run.get("ok") if last_run else None,
             "topics_learned_total": self._topics_learned_count(),
             "active_session": self._active,
+            "art_triage": self._art_triage.status() if self._art_triage else None,
         }
+
+    def art_triage_status(self) -> dict[str, Any]:
+        if self._art_triage is None:
+            return {"enabled": False, "reason": "art_triage_not_initialized"}
+        return self._art_triage.status()
+
+    async def run_art_triage(self) -> dict[str, Any]:
+        if not self.settings.art_triage_enabled:
+            return {"ok": False, "reason": "art_triage_disabled"}
+        if self._art_triage is None:
+            return {"ok": False, "reason": "art_triage_not_initialized"}
+        return self._art_triage.run_from_vault()
 
     def latest_directives(self, limit: int = 5) -> list[dict[str, Any]]:
         if not self.directives_path.is_file():
@@ -172,8 +188,16 @@ class GuardianNetworkLearner:
                     continue
                 results.append(safe)
                 self._maybe_store_vault(topic, learned, safe)
+                if self.settings.art_triage_enabled and self._art_triage is not None:
+                    summary = str(learned.get("summary", "")).strip()
+                    if summary:
+                        self._art_triage.apply_network_summary(summary, topic=topic)
         finally:
             self._active = False
+
+        art_triage_result: dict[str, Any] | None = None
+        if self.settings.art_triage_enabled and self._art_triage is not None:
+            art_triage_result = self._art_triage.run_from_vault()
 
         run_record = sanitize_outbound(
             {
@@ -197,7 +221,12 @@ class GuardianNetworkLearner:
                 }
             )
         )
-        return {"ok": run_record.get("ok", False), "results": results, "review": review}
+        return {
+            "ok": run_record.get("ok", False),
+            "results": results,
+            "review": review,
+            "art_triage": art_triage_result,
+        }
 
     def _maybe_store_vault(self, topic: str, learned: dict[str, Any], safe: dict[str, Any]) -> None:
         if self._vault is None or not learned.get("ok"):
