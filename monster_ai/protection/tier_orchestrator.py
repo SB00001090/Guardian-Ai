@@ -18,7 +18,6 @@ TIER_OVERRIDES: dict[str, dict[str, Any]] = {
             "vpn_scan_interval_seconds": 60,
             "device_contact_scan_interval_seconds": 60,
         },
-        "callguard": {"llm_analysis_enabled": False},
     },
     "cpu_only": {
         "monsterlock": {"strength": "standard", "bind_gpu": False, "check_interval_seconds": 45},
@@ -26,7 +25,6 @@ TIER_OVERRIDES: dict[str, dict[str, Any]] = {
             "vpn_scan_interval_seconds": 30,
             "device_contact_scan_interval_seconds": 20,
         },
-        "callguard": {},
     },
     "low_vram": {
         "monsterlock": {"strength": "standard", "bind_gpu": True},
@@ -39,7 +37,6 @@ TIER_OVERRIDES: dict[str, dict[str, Any]] = {
     "high_vram": {
         "monsterlock": {"strength": "strict", "bind_gpu": True},
         "crimeguard": {"llm_analysis_enabled": True},
-        "callguard": {"llm_analysis_enabled": True},
     },
 }
 

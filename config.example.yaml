@@ -267,19 +267,6 @@ protection:
     recovery_token: "MONSTER-RECOVER-2026"
     data_dir: "./data/crimeguard"
     rules_sync_url: ""
-  callguard:
-    enabled: false
-    auto_reject_threshold: 85
-    connection_mode: cloudflare_tunnel
-    tunnel_url_env: MONSTER_TUNNEL_URL
-    tunnel_url_file: ./data/callguard/tunnel_url.txt
-    consensus_min_votes: 3
-    consensus_adopt_threshold: 70
-    public_comment_board: false
-    data_dir: "./data/callguard"
-    hk_hotline: "18222"
-    github_releases_page: "https://github.com/SB00001090/Monster-Ai/releases/latest"
-    apk_download_url: ""
   firewall:
     enabled: true
     mode: learning
@@ -324,6 +311,9 @@ commercial:
 guardian:
   enabled: true
   data_dir: "./data/guardian"
+  tunnel_url_env: GUARDIAN_TUNNEL_URL
+  tunnel_url_file: ./data/guardian-ai/tunnel_url.txt
+  github_releases_page: "https://github.com/SB00001090/Guardian-Ai/releases/latest"
   cloud_sync_enabled: true
   e2e_encryption_required: true
   ephemeral_chat_default: true

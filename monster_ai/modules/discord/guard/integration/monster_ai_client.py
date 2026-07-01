@@ -80,20 +80,12 @@ class MonsterAIClient:
             resp.raise_for_status()
             return await resp.json()
 
-    async def callguard_status(self) -> dict[str, Any]:
+    async def guardian_status(self) -> dict[str, Any]:
         session = await self._get_session()
-        async with session.get(f"{self.base_url}/api/callguard/status") as resp:
+        async with session.get(f"{self.base_url}/api/guardian/status") as resp:
             if resp.status == 200:
                 return await resp.json()
             return {"enabled": False}
-
-    async def callguard_reports(self, limit: int = 10) -> list[dict[str, Any]]:
-        session = await self._get_session()
-        async with session.get(f"{self.base_url}/api/callguard/reports", params={"limit": limit}) as resp:
-            if resp.status != 200:
-                return []
-            data = await resp.json()
-            return list(data.get("reports") or [])
 
     def status_dict(self) -> dict[str, Any]:
         return {

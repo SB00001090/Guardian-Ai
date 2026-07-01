@@ -1,12 +1,12 @@
 @echo off
-REM Monster AI - Cloudflare Quick Tunnel (Call Guard)
-REM Developed by Suckbob | Monster AI Call Guard
+REM Guardian Ai - Cloudflare Quick Tunnel
+REM Developed by Suckbob | Guardian Ai
 cd /d "%~dp0"
 echo.
 echo === Cloudflare Quick Tunnel ===
 echo Project: %CD%
 echo Ensure python main.py is running on http://127.0.0.1:7860
-echo URL saves to data\callguard\tunnel_url.txt
+echo URL saves to data\guardian-ai\tunnel_url.txt
 echo.
 
 if exist .venv\Scripts\python.exe (

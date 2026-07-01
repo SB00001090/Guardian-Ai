@@ -70,8 +70,8 @@ Guardian Ai learns like a human toddler: gradual growth, positive encouragement,
 
 | Method | Command |
 |--------|---------|
-| Cloudflare Tunnel | `scripts\callguard\run-tunnel.bat` → paste HTTPS URL in app |
-| USB APK install | `scripts\callguard\install-apk-adb.ps1` + `adb reverse tcp:7860` |
+| Cloudflare Tunnel | `scripts\guardian\run-tunnel.bat` → paste HTTPS URL in app |
+| USB APK install | `scripts\guardian\install-apk-adb.ps1` + `adb reverse tcp:7860` |
 | Dify workflows | `deploy/dify/workflow_guardian.json` |
 
 Docs: [`MASTER_SPEC_20260901.md`](deploy/guardian/MASTER_SPEC_20260901.md) · [`ARCHITECTURE.md`](deploy/guardian/ARCHITECTURE.md) · [`LAUNCH_CHECKLIST.md`](deploy/guardian/LAUNCH_CHECKLIST.md) · [`ROADMAP_20260901.md`](deploy/guardian/ROADMAP_20260901.md)

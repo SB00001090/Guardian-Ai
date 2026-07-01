@@ -38,22 +38,17 @@ export interface CrimeGuardStatus {
   events?: Array<{ ts: number; level: string; message: string }>;
 }
 
-export interface CallGuardStatus {
-  enabled: boolean;
-  status: string;
-  green_dot: boolean;
-  red_dot: boolean;
-  rejects_today: number;
-  reports_today: number;
-  threat_db_version: string;
-  hk_hotline: string;
-  events?: Array<{ ts: number; level: string; message: string }>;
+export interface GuardianSecurityStatus {
+  enabled?: boolean;
+  healthy?: boolean;
+  connection_policy?: string;
+  toddler_learning?: { stage?: string };
 }
 
 export interface SecuritySnapshot {
   monsterlock: MonsterLockStatus;
   crimeguard: CrimeGuardStatus;
-  callguard: CallGuardStatus;
+  guardian: GuardianSecurityStatus;
 }
 
 export interface AppManifest {
@@ -116,12 +111,12 @@ export function useSecurityStatus() {
       const status = await fetchJson<{
         monsterlock: MonsterLockStatus;
         crimeguard: CrimeGuardStatus;
-        callguard: CallGuardStatus;
+        guardian: GuardianSecurityStatus;
       }>("/api/security/status");
       setSnapshot({
         monsterlock: status.monsterlock,
         crimeguard: status.crimeguard,
-        callguard: status.callguard,
+        guardian: status.guardian ?? { enabled: false },
       });
     } catch {
       // Python backend may be offline during dev

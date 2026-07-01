@@ -12,14 +12,14 @@ async def firewall_status(request: Request) -> dict:
     wd = request.app.state.watchdog
     ml = request.app.state.monsterlock
     cg = getattr(request.app.state, "crimeguard", None)
-    callg = getattr(request.app.state, "callguard", None)
+    guardian = getattr(request.app.state, "guardian", None)
     probe = getattr(request.app.state, "hardware_probe", None)
     return {
         "firewall": fw.to_dict(),
         "watchdog": wd.to_dict(),
         "monsterlock": ml.to_dict(),
         "crimeguard": cg.to_dict() if cg else {"enabled": False},
-        "callguard": callg.to_dict() if callg else {"enabled": False},
+        "guardian": await guardian.health() if guardian else {"enabled": False},
         "hardware": probe.to_dict() if probe else {},
         "bans": fw.blocker.list_bans(),
     }

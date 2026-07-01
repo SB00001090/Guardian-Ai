@@ -1,4 +1,4 @@
-"""Monster Guardian AI REST API."""
+"""Guardian Ai REST API."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -72,6 +72,10 @@ class NetworkLearningTriggerRequest(BaseModel):
     topics: list[str] | None = None
 
 
+class ToddlerFeedbackRequest(BaseModel):
+    reason: str = "user_praise"
+
+
 class TrainingTextAssetRequest(BaseModel):
     label: str = Field(pattern=r"^(template|prompt|lora)$")
     name: str = Field(min_length=1)
@@ -82,7 +86,7 @@ class TrainingTextAssetRequest(BaseModel):
 def _guardian(request: Request):
     svc = getattr(request.app.state, "guardian", None)
     if svc is None or not svc.settings.enabled:
-        raise HTTPException(503, "Monster Guardian AI disabled")
+        raise HTTPException(503, "Guardian Ai disabled")
     return svc
 
 
@@ -322,5 +326,24 @@ async def connection_info(request: Request) -> dict:
         "no_qr_code": True,
         "usb_apk_install": svc.settings.apk_usb_install_enabled,
         "oauth_providers": svc.settings.oauth_providers,
-        "developer": "Developed by Suckbob | Monster Guardian AI",
+        "developer": "Developed by Suckbob | Guardian Ai",
+        "connection_policy": "tunnel_or_usb_only",
     }
+
+
+@router.get("/learning/toddler/status")
+async def toddler_status(request: Request) -> dict:
+    svc = _guardian(request)
+    return svc.toddler_status()
+
+
+@router.post("/learning/toddler/progress")
+async def toddler_progress(request: Request) -> dict:
+    svc = _guardian(request)
+    return await svc.toddler_progress()
+
+
+@router.post("/learning/toddler/feedback")
+async def toddler_feedback(body: ToddlerFeedbackRequest, request: Request) -> dict:
+    svc = _guardian(request)
+    return svc.toddler_positive_feedback(reason=body.reason)

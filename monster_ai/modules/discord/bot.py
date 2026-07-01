@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Any
 
 from monster_ai.config import Settings
 from monster_ai.modules.discord.constants import DEVELOPER_CREDIT, LOG_PATH, VERSION
-from monster_ai.modules.discord.guard.integration.callguard_bridge import CallGuardBridge
 from monster_ai.modules.discord.guard.integration.monster_ai_client import MonsterAIClient
 from monster_ai.modules.discord.guard.resilience.heartbeat import HeartbeatMonitor
 from monster_ai.modules.discord.guard.resilience.notifier import DisconnectNotifier
@@ -66,13 +65,6 @@ class DiscordService:
             monster_client=self._monster_client,
             on_failure=self._on_heartbeat_failure,
         )
-        self._callguard_bridge = CallGuardBridge(
-            guard,
-            self._monster_client,
-            get_bot=lambda: self._bot,
-            get_alert_channel_id=self._resolve_alert_channel_id,
-        )
-
     def _resolve_alert_channel_id(self) -> int:
         env = os.getenv("MONSTERGUARD_ALERT_CHANNEL_ID", "").strip()
         if env.isdigit():
@@ -188,7 +180,6 @@ class DiscordService:
         base["self_heal"] = self.heal_status_dict()
         base["resilience"] = self._reconnect.state.to_dict(guard)
         base["monster_ai"] = self._monster_client.status_dict()
-        base["callguard_bridge"] = self._callguard_bridge.status_dict()
         return base
 
     @staticmethod
@@ -233,7 +224,6 @@ class DiscordService:
         await self._start_bot_task(token)
         self._start_heal_loop()
         self._heartbeat.start()
-        self._callguard_bridge.start()
 
     def _start_heal_loop(self) -> None:
         guard = self.settings.modules.discord.guard
@@ -303,8 +293,6 @@ class DiscordService:
         self._heal_stats.last_error = None
         if not self._heartbeat._task or self._heartbeat._task.done():  # noqa: SLF001
             self._heartbeat.start()
-        if not self._callguard_bridge._task or self._callguard_bridge._task.done():  # noqa: SLF001
-            self._callguard_bridge.start()
         return {"ok": True, "restarts": self._heal_stats.restarts}
 
     async def _on_heartbeat_failure(self) -> None:
@@ -360,7 +348,6 @@ class DiscordService:
     async def stop_guard(self) -> None:
         self._stop = True
         await self._heartbeat.stop()
-        await self._callguard_bridge.stop()
         await self._monster_client.close()
         if self._heal_task:
             self._heal_task.cancel()

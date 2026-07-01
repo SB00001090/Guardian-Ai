@@ -1,0 +1,5 @@
+-keep class ai.guardian.app.** { *; }
+-dontwarn okhttp3.**
+-keep class com.android.vending.billing.** { *; }
+-keep class androidx.security.crypto.** { *; }
+-keepattributes *Annotation*

@@ -64,11 +64,9 @@ from monster_ai.modules.tts.engine import TTSService
 from monster_ai.modules.video.service import VideoService
 from monster_ai.protection.firewall import FirewallEngine
 from monster_ai.protection.guards import RateLimiter
-from monster_ai.protection.callguard import CallGuardEngine
 from monster_ai.protection.crimeguard import CrimeGuardEngine
 from monster_ai.protection.monsterlock import MonsterLockEngine
 from monster_ai.protection.tier_orchestrator import ProtectionTierOrchestrator
-from monster_ai.api.callguard import router as callguard_router
 from monster_ai.api.dify import router as dify_router
 from monster_ai.api.ecosystem import router as ecosystem_router
 from monster_ai.api.integrations import router as integrations_router
@@ -131,8 +129,7 @@ def _ensure_data_dirs() -> None:
         "monsterlock/backup",
         "monsterlock/vault",
         "crimeguard",
-        "callguard",
-        "callguard/reports",
+        "guardian-ai",
         "models/gguf",
         "learning/users",
         "learning/characters",
@@ -152,17 +149,18 @@ def _ensure_data_dirs() -> None:
         "guardian/training_vault/prompt",
         "guardian/training_vault/lora",
         "guardian/network_learning",
+        "guardian/toddler",
     ):
         (Path("./data") / sub).mkdir(parents=True, exist_ok=True)
 
 
 def _bootstrap_tunnel_env(settings: Settings) -> None:
-    """Load MONSTER_TUNNEL_URL from data/callguard/tunnel_url.txt when env unset."""
-    cg = settings.protection.callguard
-    key = cg.tunnel_url_env
+    """Load tunnel URL from data/guardian-ai/tunnel_url.txt when env unset."""
+    g = settings.guardian
+    key = g.tunnel_url_env
     if os.environ.get(key, "").strip():
         return
-    path = Path(cg.tunnel_url_file)
+    path = Path(g.tunnel_url_file)
     if not path.is_absolute():
         path = Path(__file__).resolve().parents[1] / path
     if not path.is_file():
@@ -170,7 +168,7 @@ def _bootstrap_tunnel_env(settings: Settings) -> None:
     url = path.read_text(encoding="utf-8-sig").strip().rstrip("/")
     if url:
         os.environ[key] = url
-        logger.info("MONSTER_TUNNEL_URL loaded from %s", path)
+        logger.info("%s loaded from %s", key, path)
 
 
 def _setup_file_logging() -> None:
@@ -189,13 +187,11 @@ async def lifespan(app: FastAPI):
     self_heal: SelfHealOrchestrator = app.state.self_heal
     monsterlock: MonsterLockEngine = app.state.monsterlock
     crimeguard: CrimeGuardEngine = app.state.crimeguard
-    callguard: CallGuardEngine = app.state.callguard
     removed = history.purge_on_startup()
     if removed:
         logger.info("Purged %s old history entries", removed)
     await monsterlock.start()
     await crimeguard.start()
-    await callguard.start()
     await repair.start()
     await watchdog.start()
     await self_heal.start()
@@ -216,7 +212,6 @@ async def lifespan(app: FastAPI):
     await watchdog.stop()
     await repair.stop()
     await crimeguard.stop()
-    await callguard.stop()
     await monsterlock.stop()
 
 
@@ -227,8 +222,8 @@ def create_app(settings: Settings) -> FastAPI:
     _init_sentry(settings)
 
     app = FastAPI(
-        title="Monster AI",
-        description="Local-first, modular AI platform",
+        title="Guardian Ai",
+        description="Local-first AI platform — toddler learning, OC protection, encrypted vault",
         version=__version__,
         lifespan=lifespan,
     )
@@ -268,12 +263,6 @@ def create_app(settings: Settings) -> FastAPI:
         settings, root=root, probe=probe, tier_result=tier_result
     )
     crimeguard.repair = repair
-    callguard = CallGuardEngine(
-        settings.protection.callguard,
-        root,
-        repair_engine=repair,
-        monsterlock=monsterlock,
-    )
     gen_repair = GenerationRepair(max_retries=settings.repair.generation_max_retries)
     vram_guard = VramGuard()
     gen_progress = GenerationProgress()
@@ -420,7 +409,6 @@ def create_app(settings: Settings) -> FastAPI:
     app.state.firewall = firewall
     app.state.monsterlock = monsterlock
     app.state.crimeguard = crimeguard
-    app.state.callguard = callguard
     app.state.hardware_probe = probe
     app.state.tier_result = tier_result
     app.state.watchdog = watchdog
@@ -447,7 +435,6 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(generation_router)
     app.include_router(history_router)
     app.include_router(security_router)
-    app.include_router(callguard_router)
     app.include_router(guard_router)
     app.include_router(heal_router)
     app.include_router(learning_router)

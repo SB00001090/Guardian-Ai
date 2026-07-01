@@ -70,7 +70,6 @@ async def status(request: Request) -> dict:
     watchdog = request.app.state.watchdog
     monsterlock = request.app.state.monsterlock
     crimeguard = getattr(request.app.state, "crimeguard", None)
-    callguard = getattr(request.app.state, "callguard", None)
     probe = getattr(request.app.state, "hardware_probe", None)
     vram = request.app.state.vram_guard
     registry = request.app.state.modules
@@ -101,7 +100,7 @@ async def status(request: Request) -> dict:
         "learning": await learning.health() if learning else {"enabled": False},
         "monsterlock": monsterlock.to_dict(),
         "crimeguard": crimeguard.to_dict() if crimeguard else {"enabled": False},
-        "callguard": callguard.to_dict() if callguard else {"enabled": False},
+        "guardian": await request.app.state.guardian.health() if hasattr(request.app.state, "guardian") else {"enabled": False},
         "persona_mode": request.app.state.settings.persona.default_mode,
         "modules": await registry.health_report(),
     }

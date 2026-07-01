@@ -80,7 +80,6 @@ class MonsterGuardBot(commands.Bot):
         from monster_ai.modules.discord.guard.cogs import (
             admin,
             ai_commands,
-            callguard,
             chat_bridge,
             commercial,
             education,
@@ -96,7 +95,6 @@ class MonsterGuardBot(commands.Bot):
         await admin.setup(self)
         await intro.setup(self)
         await monitor.setup(self)
-        await callguard.setup(self)
         await ai_commands.setup(self)
         await chat_bridge.setup(self)
         await learning.setup(self)

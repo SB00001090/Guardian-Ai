@@ -412,26 +412,6 @@ class MonsterLockSettings(BaseModel):
     )
 
 
-class CallGuardSettings(BaseModel):
-    enabled: bool = False
-    locale: str = "zh-HK"
-    llm_analysis_enabled: bool = True
-    auto_reject_threshold: int = 85
-    deep_analyze_threshold: int = 60
-    threat_db_sync_hours: int = 6
-    connection_mode: str = "cloudflare_tunnel"
-    tunnel_url_env: str = "MONSTER_TUNNEL_URL"
-    tunnel_url_file: str = "./data/callguard/tunnel_url.txt"
-    data_dir: str = "./data/callguard"
-    report_enabled: bool = True
-    consensus_min_votes: int = 3
-    consensus_adopt_threshold: int = 70
-    public_comment_board: bool = False
-    hk_hotline: str = "18222"
-    apk_download_url: str = ""
-    github_releases_page: str = "https://github.com/SB00001090/Monster-Ai/releases/latest"
-
-
 class CrimeGuardSettings(BaseModel):
     enabled: bool = True
     locale: str = "zh-HK"
@@ -469,7 +449,6 @@ class ProtectionSettings(BaseModel):
     notifications: NotificationSettings = Field(default_factory=NotificationSettings)
     monsterlock: MonsterLockSettings = Field(default_factory=MonsterLockSettings)
     crimeguard: CrimeGuardSettings = Field(default_factory=CrimeGuardSettings)
-    callguard: CallGuardSettings = Field(default_factory=CallGuardSettings)
 
 
 class GuardianNetworkLearningSettings(BaseModel):
@@ -484,7 +463,7 @@ class GuardianNetworkLearningSettings(BaseModel):
 
 
 class GuardianSettings(BaseModel):
-    """Monster Guardian AI — cloud sync, OC protection, error learning."""
+    """Guardian Ai — cloud sync, OC protection, toddler learning, error learning."""
 
     enabled: bool = True
     data_dir: str = "./data/guardian"
@@ -497,7 +476,9 @@ class GuardianSettings(BaseModel):
     grok_supervision_enabled: bool = True
     min_quality_score: float = 0.70
     oauth_providers: list[str] = Field(default_factory=lambda: ["google", "github"])
-    tunnel_url_env: str = "MONSTER_TUNNEL_URL"
+    tunnel_url_env: str = "GUARDIAN_TUNNEL_URL"
+    tunnel_url_file: str = "./data/guardian-ai/tunnel_url.txt"
+    github_releases_page: str = "https://github.com/SB00001090/Guardian-Ai/releases/latest"
     apk_usb_install_enabled: bool = True
     training_encryption_enabled: bool = True
     bind_hardware_key: bool = True

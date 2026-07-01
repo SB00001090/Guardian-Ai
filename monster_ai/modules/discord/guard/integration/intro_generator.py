@@ -28,7 +28,6 @@ def build_status_context(bot: MonsterGuardBot) -> dict[str, Any]:
     stats = bot.status_dict()
     resilience: dict[str, Any] = {}
     monster_ai: dict[str, Any] = {}
-    callguard: dict[str, Any] = {}
     connected = bot.is_ready() and not bot.is_closed()
 
     svc = bot.discord_service
@@ -37,7 +36,6 @@ def build_status_context(bot: MonsterGuardBot) -> dict[str, Any]:
         connected = gs.get("connected", connected)
         resilience = gs.get("resilience", {})
         monster_ai = gs.get("monster_ai", {})
-        callguard = gs.get("callguard_bridge", {})
 
     return {
         "version": VERSION,
@@ -50,32 +48,25 @@ def build_status_context(bot: MonsterGuardBot) -> dict[str, Any]:
         "standby": resilience.get("standby_mode", False),
         "reconnect_attempts": resilience.get("reconnect_attempts", 0),
         "monster_ai_linked": monster_ai.get("connected", False),
-        "callguard_bridge": callguard.get("enabled", False),
-        "callguard_status": callguard.get("status", "unknown"),
-        "callguard_forwarded": callguard.get("forwarded", 0),
+        "guardian_ai": True,
     }
 
 
 def _fallback_intro(style: str, ctx: dict[str, Any], member_name: str | None) -> str:
     greet = f"歡迎 {member_name}！" if member_name else "你好！"
     stability = "連線穩定" if ctx["connected"] and ctx["heartbeat_ok"] else "正在守護連線中"
-    cg = (
-        f"CallGuard 橋接：`{'開啟' if ctx['callguard_bridge'] else '關閉'}` · "
-        f"狀態 `{ctx['callguard_status']}`"
-    )
     base = (
-        f"{greet} 我是 **Monster AI** 生態的 Discord 守衛節點（{PRODUCT_NAME} v{ctx['version']}）。\n\n"
+        f"{greet} 我是 **Guardian Ai** 生態的 Discord 守衛節點（{PRODUCT_NAME} v{ctx['version']}）。\n\n"
         f"• {stability} · 已掃描 `{ctx['scanned']}` 則 · 攔截 `{ctx['blocked']}`\n"
         f"• 規則版本 `{ctx['rules_version']}` · Monster AI `{'已連線' if ctx['monster_ai_linked'] else '待授權'}`\n"
-        f"• {cg}\n\n"
-        f"指令：`/intro` `/status` `/ai` `/callguard` `/防盜` `/guard setup`\n"
+        f"• Guardian Ai 幼兒式學習與 E2E 同步已就緒\n\n"
+        f"指令：`/intro` `/status` `/ai` `/guard setup`\n"
         f"🔒 本地優先 · 零信任 · {DEVELOPER_CREDIT}"
     )
     if style == "cyberpunk":
         return (
             f"{greet} ◢◤ **Monster AI online** — neon shields engaged.\n\n"
             f"Uptime vibe: **{stability}** | Blocks today: `{ctx['blocked']}` | Rules: `{ctx['rules_version']}`\n"
-            f"{cg}\n\n"
             "Try `/intro` for style swaps · `/ai` to chat with your local LLM.\n"
             f"{DEVELOPER_CREDIT}"
         )
@@ -83,7 +74,7 @@ def _fallback_intro(style: str, ctx: dict[str, Any], member_name: str | None) ->
         return (
             f"{greet} 我是您伺服器內的**隱私守護節點**。\n\n"
             "所有分析預設在您的 Monster AI 本地環境完成；Discord 僅作橋接，不將資料送往第三方雲端。\n"
-            f"目前狀態：{stability} · 規則 `{ctx['rules_version']}` · {cg}\n\n"
+            f"目前狀態：{stability} · 規則 `{ctx['rules_version']}`\n\n"
             f"{DEVELOPER_CREDIT}"
         )
     return base
@@ -101,15 +92,14 @@ async def generate_intro(
     context_block = (
         f"version={ctx['version']}, connected={ctx['connected']}, heartbeat={ctx['heartbeat_ok']}, "
         f"scanned={ctx['scanned']}, blocked={ctx['blocked']}, rules={ctx['rules_version']}, "
-        f"callguard_bridge={ctx['callguard_bridge']}, callguard_status={ctx['callguard_status']}, "
-        f"callguard_forwarded={ctx['callguard_forwarded']}, monster_ai_linked={ctx['monster_ai_linked']}"
+        f"guardian_ai={ctx['guardian_ai']}, monster_ai_linked={ctx['monster_ai_linked']}"
     )
     member_line = f"The greeting is for Discord member: {member_name}." if member_name else ""
     system = (
         "You are Monster AI speaking through MonsterGuard Discord bot. "
         f"Style: {INTRO_STYLES[style_key]}. "
         "Write 120-220 words in Traditional Chinese (mix English cyber terms OK). "
-        "Include current status metrics provided. Mention CallGuard integration if enabled. "
+        "Include current status metrics provided. Mention Guardian Ai toddler learning if relevant. "
         "End with one line inviting /guard setup or /status. No markdown headers."
     )
     prompt = (

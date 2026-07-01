@@ -49,7 +49,7 @@ def build_frontend() -> int:
 
 
 def _save_tunnel_url(url: str) -> Path:
-    out = ROOT / "data" / "callguard" / "tunnel_url.txt"
+    out = ROOT / "data" / "guardian-ai" / "tunnel_url.txt"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(url.strip().rstrip("/") + "\n", encoding="utf-8")
     return out
@@ -65,8 +65,8 @@ def start_quick_tunnel() -> int:
         return 1
     print("Starting quick tunnel → http://127.0.0.1:7860")
     print("Ensure python main.py is running locally.")
-    print("Tunnel URL auto-saves to data/callguard/tunnel_url.txt")
-    print("Set MONSTER_TUNNEL_URL / VITE_MONSTER_API_URL to this URL for Pages + mobile")
+    print("Tunnel URL auto-saves to data/guardian-ai/tunnel_url.txt")
+    print("Set GUARDIAN_TUNNEL_URL / VITE_MONSTER_API_URL to this URL for Pages + mobile")
     proc = subprocess.Popen(
         [cf, "tunnel", "--url", "http://127.0.0.1:7860"],
         cwd=str(ROOT),

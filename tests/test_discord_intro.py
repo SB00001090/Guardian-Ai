@@ -50,7 +50,7 @@ def test_build_status_context() -> None:
     ctx = build_status_context(_mock_bot())
     assert ctx["connected"] is True
     assert ctx["blocked"] == 3
-    assert ctx["callguard_bridge"] is True
+    assert ctx["guardian_ai"] is True
 
 
 @pytest.mark.asyncio

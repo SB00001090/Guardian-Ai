@@ -73,7 +73,7 @@ def test_oauth_user_hash_stable():
 def test_oc_fingerprint_and_verify():
     card = {"name": "Luna", "description": "moon witch", "worldview": "fantasy"}
     record = generate_fingerprint(card, owner_id="user-1")
-    assert record["watermark"].startswith("MGA-")
+    assert record["watermark"].startswith("GDA-")
     assert verify_ownership(card, record, owner_id="user-1")
 
 

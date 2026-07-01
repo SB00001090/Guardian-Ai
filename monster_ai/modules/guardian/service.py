@@ -1,4 +1,4 @@
-"""Monster Guardian AI — unified privacy, sync, OC protection, and learning service."""
+"""Guardian Ai — unified privacy, sync, OC protection, and toddler learning service."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -16,6 +16,7 @@ from monster_ai.modules.guardian.oc_fingerprint import OCFingerprintStore, embed
 from monster_ai.modules.guardian.backstory import BackstoryGenerator
 from monster_ai.modules.guardian.art_triage import ArtTriageEngine
 from monster_ai.modules.guardian.network_learning import GuardianNetworkLearner
+from monster_ai.modules.guardian.toddler_learning import ToddlerLearningEngine
 from monster_ai.modules.guardian.training_vault import TrainingVault
 
 if TYPE_CHECKING:
@@ -47,6 +48,7 @@ class GuardianService:
         self.oc_store = OCFingerprintStore(root)
         self.errors = ErrorLearningStore(root)
         self.supervisor = GrokSupervisor(root, repair)
+        self.toddler = ToddlerLearningEngine(root, self.supervisor)
         self.backstory = BackstoryGenerator(self.oc_store)
         self.key_manager = TrainingKeyManager(
             settings,
@@ -75,9 +77,11 @@ class GuardianService:
             "grok_supervision": self.settings.grok_supervision_enabled,
             "min_quality_score": self.settings.min_quality_score,
             "oauth_providers": self.settings.oauth_providers,
+            "connection_policy": "tunnel_or_usb_only",
             "no_tailscale": True,
             "no_qr_code": True,
             "connection_mode": "cloudflare_tunnel",
+            "toddler_learning": self.toddler.status(),
             "training_encryption": self.settings.training_encryption_enabled,
             "training_vault": self.training_vault.status() if self.training_vault else None,
             "network_learning": (
@@ -143,13 +147,27 @@ class GuardianService:
 
     def quality_gate(self, score: float) -> dict[str, Any]:
         passed = score >= self.settings.min_quality_score
+        toddler = self.toddler.record_quality_result(passed=passed, score=score)
         return {
             "score": score,
             "threshold": self.settings.min_quality_score,
             "passed": passed,
             "status": "pass" if passed else "fail",
             "action": None if passed else "retry_generation",
+            "toddler": toddler.get("status"),
         }
+
+    def toddler_status(self) -> dict[str, Any]:
+        return self.toddler.status()
+
+    async def toddler_progress(self) -> dict[str, Any]:
+        snapshot: dict[str, Any] = {}
+        if self.learning:
+            snapshot = self.learning.evolution_snapshot()
+        return await self.toddler.progress_with_grok(snapshot)
+
+    def toddler_positive_feedback(self, *, reason: str = "user_praise") -> dict[str, Any]:
+        return self.toddler.record_positive_feedback(reason=reason)
 
     async def generate_backstory(
         self,

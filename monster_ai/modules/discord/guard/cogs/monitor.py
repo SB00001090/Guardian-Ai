@@ -16,12 +16,11 @@ async def global_status(interaction: discord.Interaction) -> None:
 
     resilience = {}
     monster_ai = {}
-    callguard = {}
+    guardian: dict = {}
     if svc:
         gs = svc.guard_status()
         resilience = gs.get("resilience", {})
         monster_ai = gs.get("monster_ai", {})
-        callguard = gs.get("callguard_bridge", {})
         connected = gs.get("connected", connected)
 
     guard_stats = bot.status_dict() if hasattr(bot, "status_dict") else {}
@@ -29,7 +28,7 @@ async def global_status(interaction: discord.Interaction) -> None:
         connected=connected,
         resilience=resilience,
         monster_ai=monster_ai,
-        callguard=callguard,
+        guardian=guardian,
         guard_stats=guard_stats,
     )
     await interaction.followup.send(embed=embed, ephemeral=True)

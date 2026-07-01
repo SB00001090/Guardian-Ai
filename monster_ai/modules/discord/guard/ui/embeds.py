@@ -24,7 +24,7 @@ def status_embed(
     connected: bool,
     resilience: dict[str, Any] | None = None,
     monster_ai: dict[str, Any] | None = None,
-    callguard: dict[str, Any] | None = None,
+    guardian: dict[str, Any] | None = None,
     guard_stats: dict[str, Any] | None = None,
     frame_idx: int = 0,
 ) -> discord.Embed:
@@ -60,13 +60,13 @@ def status_embed(
         inline=True,
     )
 
-    cg = callguard or {}
+    g = guardian or {}
     embed.add_field(
-        name="CallGuard 來電守衛",
+        name="Guardian Ai",
         value=(
-            f"橋接：`{'開啟' if cg.get('enabled') else '關閉'}`\n"
-            f"狀態：`{cg.get('status', '未知')}`\n"
-            f"已轉發：`{cg.get('forwarded', 0)}`"
+            f"啟用：`{_yn(bool(g.get('enabled', True)))}`\n"
+            f"階段：`{(g.get('toddler_learning') or {}).get('stage', '—')}`\n"
+            f"連線：`{g.get('connection_policy', 'tunnel_or_usb_only')}`"
         ),
         inline=True,
     )
@@ -87,7 +87,7 @@ def about_embed() -> discord.Embed:
             "**Monster AI 生態 Discord 橋樑**\n\n"
             "• 反詐騙訊息掃描\n"
             "• 本地 LLM 對話（`/ai`、`/chat`）\n"
-            "• Monster CallGuard 警報（`/callguard`、`/防盜`）\n"
+            "• Guardian Ai 雲端同步與幼兒式學習\n"
             "• 防斷線自修復（10 次重試 + 心跳）\n"
             "• 監控指令（`/status`、`/guard restart`）\n"
             "• Monster AI 動態自我介紹（`/intro`、`/monsterai`）\n"
@@ -134,17 +134,3 @@ def intro_embed(
     return embed
 
 
-def callguard_alert_embed(report: dict[str, Any]) -> discord.Embed:
-    score = report.get("score", 0)
-    number = report.get("number", "unknown")
-    category = report.get("category", "suspicious")
-    embed = discord.Embed(
-        title="📞 CallGuard 高風險來電警報",
-        description=f"**號碼：** `{number}`\n**風險分數：** `{score}`\n**類別：** `{category}`",
-        color=NEON_COLORS["alert"] if score >= 80 else NEON_COLORS["magenta"],
-    )
-    signals = report.get("signals") or []
-    if signals:
-        embed.add_field(name="特徵", value=", ".join(str(s) for s in signals[:6]), inline=False)
-    embed.set_footer(text=neon_footer())
-    return embed

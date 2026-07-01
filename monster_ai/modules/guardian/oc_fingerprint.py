@@ -33,7 +33,7 @@ def generate_fingerprint(card: dict[str, Any], *, owner_id: str = "local") -> di
         "owner_id": owner_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "network_learning_allowed": False,
-        "watermark": f"MGA-{fingerprint[:8].upper()}",
+        "watermark": f"GDA-{fingerprint[:8].upper()}",
     }
 
 
@@ -55,7 +55,7 @@ def verify_ownership(
 
 def embed_watermark(card: dict[str, Any], record: dict[str, Any]) -> dict[str, Any]:
     out = dict(card)
-    meta = dict(out.get("extensions", {}).get("monster_guardian", {}))
+    meta = dict(out.get("extensions", {}).get("guardian_ai", {}))
     meta.update(
         {
             "watermark": record.get("watermark"),
@@ -64,7 +64,7 @@ def embed_watermark(card: dict[str, Any], record: dict[str, Any]) -> dict[str, A
         }
     )
     ext = dict(out.get("extensions", {}))
-    ext["monster_guardian"] = meta
+    ext["guardian_ai"] = meta
     out["extensions"] = ext
     return out
 

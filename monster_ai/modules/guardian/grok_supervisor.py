@@ -16,7 +16,11 @@ NETWORK_REVIEW_SYSTEM = """You are Grok approving Guardian autonomous network le
 Only approve public tech/news/art-quality topics. Deny any OC names, chat excerpts, or private paths.
 Output JSON only: {"approved":true|false,"topics":["..."],"reason":"..."}"""
 
-SUPERVISOR_SYSTEM = """You are Grok supervising Monster Guardian AI's learning system.
+TODDLER_SUPERVISOR_SYSTEM = """You are Grok caring for Guardian Ai like a human toddler teacher.
+Use positive reinforcement first; gentle corrections only. Never shame or over-censor.
+Output JSON only: {"stage_recommendation":"infant|toddler|preschool|school","praise":"...","gentle_corrections":["..."],"next_topics":["..."],"strategy_note":""}"""
+
+SUPERVISOR_SYSTEM = """You are Grok supervising Guardian Ai's learning system.
 Prioritize: (1) recurring errors, (2) user safety/privacy regressions, (3) quality below 70%.
 Avoid bias toward over-censorship — this is a local-first, user-owned platform.
 Output JSON only: {"priorities":[{"id","action","reason","urgency"}],"bias_warnings":[],"strategy_note":""}"""
@@ -182,6 +186,48 @@ class GrokSupervisor:
         except Exception:  # noqa: BLE001
             pass
         return ""
+
+    async def review_toddler_progress(
+        self,
+        *,
+        stage: str,
+        milestones: dict[str, Any],
+        learning_snapshot: dict[str, Any],
+    ) -> dict[str, Any]:
+        praise = "你正在穩步成長，繼續保持好奇心！ / You're growing steadily — keep exploring!"
+        corrections: list[str] = []
+        if int(milestones.get("quality_attempts", 0)) > 5:
+            passes = int(milestones.get("quality_passes", 0))
+            attempts = int(milestones.get("quality_attempts", 0))
+            if passes / max(attempts, 1) < 0.7:
+                corrections.append(
+                    "品質還在學習中，我們一起調整提示詞再試。 / Quality is still learning — let's refine prompts together."
+                )
+        directive: dict[str, Any] = {
+            "supervisor": "grok",
+            "stage_recommendation": stage,
+            "praise": praise,
+            "gentle_corrections": corrections,
+            "next_topics": ["digital art quality", "AI tech news"],
+            "strategy_note": "Toddler-mode supervision — encouragement first",
+            "reviewed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if self._repair is not None:
+            prompt = (
+                f"{TODDLER_SUPERVISOR_SYSTEM}\n\n"
+                f"stage={stage}\nmilestones={json.dumps(milestones, ensure_ascii=False)}\n"
+                f"learning={json.dumps(learning_snapshot, ensure_ascii=False)[:1500]}"
+            )
+            try:
+                text = await self._repair.chat(prompt, system=TODDLER_SUPERVISOR_SYSTEM, temperature=0.35)
+                if text and "{" in text:
+                    directive["strategy_note"] = text.strip()[:1200]
+            except Exception:  # noqa: BLE001
+                pass
+        toddler_log = self.root / "toddler_directives.jsonl"
+        with toddler_log.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(directive, ensure_ascii=False) + "\n")
+        return directive
 
     def latest_directives(self, limit: int = 5) -> list[dict[str, Any]]:
         if not self.log_path.is_file():

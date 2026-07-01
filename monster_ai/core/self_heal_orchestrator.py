@@ -169,7 +169,7 @@ class SelfHealOrchestrator:
                 self._log(inc)
 
         if self.settings.check_api:
-            api_ok = await self._ping("http://127.0.0.1:7860/api/callguard/status")
+            api_ok = await self._ping("http://127.0.0.1:7860/api/guardian/status")
             if not api_ok:
                 inc = HealIncident("api", "critical", "monster_ai_api_down", "supervisor_restart", False)
                 results.append(inc)

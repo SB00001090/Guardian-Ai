@@ -26,19 +26,18 @@ async def guard_status(interaction: discord.Interaction) -> None:
     connected = bot.is_ready()
     resilience = {}
     monster_ai = {}
-    callguard = {}
+    guardian: dict = {}
     if svc:
         gs = svc.guard_status()
         connected = gs.get("connected", connected)
         resilience = gs.get("resilience", {})
         monster_ai = gs.get("monster_ai", {})
-        callguard = gs.get("callguard_bridge", {})
 
     embed = status_embed(
         connected=connected,
         resilience=resilience,
         monster_ai=monster_ai,
-        callguard=callguard,
+        guardian=guardian,
         guard_stats={**status, "blocked_24h": blocked_24h},
     )
     embed.add_field(name="保護強度", value=cfg.protection_level, inline=True)

@@ -27,6 +27,7 @@ import DeployPage from "./pages/DeployPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
 import GuardianSyncPage from "./pages/GuardianSyncPage";
 import NetworkLearningPanel from "./pages/NetworkLearningPanel";
+import ToddlerLearningPanel from "./pages/ToddlerLearningPanel";
 import { BackendProvider } from "./contexts/BackendContext";
 
 import LoadingScreen from "./components/LoadingScreen";
@@ -182,6 +183,11 @@ function Router() {
       <Route path="/network-learning">
         <DashboardLayout>
           <NetworkLearningPanel />
+        </DashboardLayout>
+      </Route>
+      <Route path="/toddler-learning">
+        <DashboardLayout>
+          <ToddlerLearningPanel />
         </DashboardLayout>
       </Route>
 
