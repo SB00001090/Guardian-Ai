@@ -20,13 +20,13 @@ grok mcp doctor supabase
 Expected before auth: `OAuth authorization required`  
 Expected after auth: handshake OK + tools listed
 
-## Cursor
+## VS Code / Cursor
 
-Add to **Settings → Tools & MCP** or use project [`.mcp.json`](../../.mcp.json):
+Use project [`.vscode/mcp.json`](../../.vscode/mcp.json) (`servers` key — VS Code 2026 format):
 
 ```json
 {
-  "mcpServers": {
+  "servers": {
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=unoayywzgfkrtnjsrkdq"
@@ -35,7 +35,9 @@ Add to **Settings → Tools & MCP** or use project [`.mcp.json`](../../.mcp.json
 }
 ```
 
-Restart Cursor after first OAuth login.
+Command Palette: **MCP: List Servers** → start **supabase** → complete OAuth in browser.
+
+Cursor can also use root [`.mcp.json`](../../.mcp.json) (`mcpServers` key). Restart after first OAuth login.
 
 ## GitHub Copilot
 

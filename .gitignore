@@ -26,7 +26,8 @@ coverage/
 
 # IDE / tooling
 .idea/
-.vscode/
+.vscode/*
+!.vscode/mcp.json
 *.swp
 mcps/
 .gradle/
